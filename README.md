@@ -27,7 +27,7 @@ A small, responsive web app for a sales team to monitor sales orders across bran
 Requirements: Node.js 20+ (tested on 22.14).
 
 ```bash
-git clone https://github.com/YOUR-USER/hssb-sales-order-monitor.git
+git clone https://github.com/YsinHsim/hssb-sales-order-monitor.git
 cd hssb-sales-order-monitor
 cp .env.example .env
 npm install
