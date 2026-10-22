@@ -1,0 +1,24 @@
+{
+  "name": "hssb-sales-order-monitor",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "test": "vitest run",
+    "typecheck": "nuxt typecheck",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "lucide-vue-next": "^0.563.0",
+    "nuxt": "^3.21.0",
+    "tailwindcss": "^4.1.18",
+    "vue": "^3.5.27",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
+  }
+}
