@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TriangleAlert, X } from "lucide-vue-next";
+import { Check, Copy, TriangleAlert, X } from "lucide-vue-next";
 import { formatCurrency, formatDate, formatDateTime } from "~~/shared/format";
 import type { SalesOrder } from "~~/shared/types";
 
@@ -56,12 +56,15 @@ function onKey(e: KeyboardEvent) {
 onMounted(() => window.addEventListener("keydown", onKey));
 onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
 
+const { copy, copiedKey, failedKey } = useCopy();
+
+// Rows with `copy: true` render as click-to-copy buttons.
 const rows = computed(() => {
   const o = order.value;
   if (!o) return [];
-  return [
-    ["Customer account", o.CustAccount],
-    ["Customer ref (PO)", o.CustomerRef],
+  const list: [string, string | null, boolean?][] = [
+    ["Customer account", o.CustAccount, true],
+    ["Customer ref (PO)", o.CustomerRef, true],
     ["Branch / site", o.InventSiteId],
     ["Sales group", o.SalesGroup],
     ["Sales type", o.SalesType],
@@ -73,7 +76,8 @@ const rows = computed(() => {
     ["Order date", formatDateTime(o.CreatedDateTime1)],
     ["Requested ship date", formatDate(o.ShippingDateRequested)],
     ["Last modified", formatDateTime(o.ModifiedDateTime1)],
-  ] as [string, string | null][];
+  ];
+  return list.map(([label, value, copyable]) => ({ label, value, copyable: Boolean(copyable && value) }));
 });
 </script>
 
@@ -134,11 +138,48 @@ const rows = computed(() => {
               </div>
             </dl>
 
-            <dl class="mt-4 divide-y divide-slate-100 text-sm">
-              <div v-for="[label, value] in rows" :key="label" class="flex justify-between gap-4 py-2.5">
-                <dt class="text-slate-500">{{ label }}</dt>
-                <dd class="text-right font-medium text-slate-900">{{ value || "—" }}</dd>
-              </div>
+            <p class="mt-4 text-xs text-slate-500">Tip: click a highlighted value to copy it.</p>
+            <p class="sr-only" aria-live="polite">{{ copiedKey ? `${copiedKey} copied to clipboard` : "" }}</p>
+            <dl class="mt-1 divide-y divide-slate-100 text-sm">
+              <template v-for="row in rows" :key="row.label">
+                <!-- Whole row is clickable; the button inside gives keyboard and screen-reader access. -->
+                <div
+                  v-if="row.copyable"
+                  class="group -mx-2 flex cursor-pointer items-center justify-between gap-4 rounded-lg px-2 py-2.5 transition hover:bg-brand-50"
+                  :title="`Click to copy ${row.label.toLowerCase()}`"
+                  @click="copy(row.label, row.value!)"
+                >
+                  <dt class="text-slate-500 group-hover:text-brand-700">{{ row.label }}</dt>
+                  <dd>
+                    <button
+                      type="button"
+                      class="flex items-center gap-2 rounded-md font-medium text-slate-900 focus-visible:outline-2 focus-visible:outline-brand-500"
+                      :aria-label="`Copy ${row.label}: ${row.value}`"
+                      @click.stop="copy(row.label, row.value!)"
+                    >
+                      <span class="font-mono underline decoration-slate-300 decoration-dashed underline-offset-4 group-hover:decoration-brand-500">{{ row.value }}</span>
+                      <span
+                        class="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium transition"
+                        :class="
+                          copiedKey === row.label
+                            ? 'bg-emerald-50 text-emerald-700'
+                            : failedKey === row.label
+                              ? 'bg-rose-50 text-rose-700'
+                              : 'bg-slate-100 text-slate-500 group-hover:bg-brand-100 group-hover:text-brand-700'
+                        "
+                      >
+                        <Check v-if="copiedKey === row.label" class="size-3.5" aria-hidden="true" />
+                        <Copy v-else class="size-3.5" aria-hidden="true" />
+                        {{ copiedKey === row.label ? "Copied" : failedKey === row.label ? "Failed" : "Copy" }}
+                      </span>
+                    </button>
+                  </dd>
+                </div>
+                <div v-else class="flex justify-between gap-4 py-2.5">
+                  <dt class="text-slate-500">{{ row.label }}</dt>
+                  <dd class="text-right font-medium text-slate-900">{{ row.value || "—" }}</dd>
+                </div>
+              </template>
             </dl>
 
             <div v-if="order.DOT_SONotes" class="mt-4 rounded-lg border border-slate-200 p-3 text-sm text-slate-700">
