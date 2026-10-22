@@ -108,7 +108,19 @@ tests/                       Vitest unit tests
 
 ## AI-use disclosure
 
-- **Tool:** Claude Code (Anthropic, Claude Opus 5.5 model), used as a pair programmer.
-- **What it did:** read the brief, probed the API with curl (which found that `summary` is dataset-wide and that out-of-range pages return empty data), proposed the proxy design, and generated most of the code, tests and this README.
-- **What I did:** chose the stack and the server-proxy approach, reviewed every file, ran and checked the app in the browser, and adjusted <!-- list your own changes here -->.
-- **How it was verified:** unit tests (`npm test`, 15 passing), a production build, manual browser checks on desktop and mobile (375 px) against the live API, and curl checks of the proxy's validation and error mapping (bad ID gives 400, unknown order gives 404, wrong key gives 502, missing key gives 500, `pageSize=999` is clamped to 100, unknown `sort` is ignored). I also confirmed the API key does not appear in the client bundle or the page HTML.
+**How I used AI.** I used Claude Code (Anthropic) as a pair programmer. It read the brief, probed the API with curl (finding that `summary` is dataset-wide and that out-of-range pages return empty data), proposed the server-proxy design, and generated most of the initial code, unit tests and this README.
+
+**My part.** I chose the stack (Nuxt 3, Tailwind, Vercel) and the scope, agreed to keep the API key server-side, deployed the app on Vercel and set the key as an environment variable. I reviewed the code structure (proxy routes, input validation, URL-based filter state) so I can explain it.
+
+**What I changed after testing.**
+- When I tested the deployed app, the *Total orders* and *Completed* cards weren't clickable. Because the API filters one status at a time, *Total* now clears the status filter and *Completed* has *Invoiced* / *Delivered* chips.
+- After using the app, I asked for usability improvements: click-to-copy for customer account and PO reference, a collapsible filter panel, and a fixed-height table with a sticky header.
+
+**Something new for me.** In my current projects I usually call APIs from the frontend and manage shared state with Pinia. Here I tried Nuxt's built-in Nitro server for the first time, as a small backend-for-frontend that keeps the API key private and handles validation and errors in one place. Because the app is a single page whose state is mostly filters, I kept that state in the URL instead of a Pinia store. If the app grew to several pages sharing data, I would add Pinia.
+
+**How it was tested.**
+- Unit tests: `npm test`, 15 passing (input validation and formatting).
+- Manual checks against the live API: every status and branch filter, search, combined filters, sorting, pagination, an out-of-range page, the empty state, the order detail panel, and mobile (375 px) and desktop layouts.
+- Proxy checks with curl: bad ID gives 400, unknown order 404, wrong key 502, missing key 500, `pageSize=999` capped to 100, unknown `sort` ignored.
+- The API key does not appear in the page HTML or the client bundle.
+- The deployed Vercel URL was tested directly.
