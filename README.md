@@ -116,7 +116,7 @@ tests/                       Vitest unit tests
 - When I tested the deployed app, the *Total orders* and *Completed* cards weren't clickable. Because the API filters one status at a time, *Total* now clears the status filter and *Completed* has *Invoiced* / *Delivered* chips.
 - After using the app, I asked for usability improvements: click-to-copy for customer account and PO reference, a collapsible filter panel, and a fixed-height table with a sticky header.
 
-**Something new for me.** In my current projects I usually call APIs from the frontend and manage shared state with Pinia. Here I tried Nuxt's built-in Nitro server for the first time, as a small backend-for-frontend that keeps the API key private and handles validation and errors in one place. Because the app is a single page whose state is mostly filters, I kept that state in the URL instead of a Pinia store. If the app grew to several pages sharing data, I would add Pinia.
+**Something new for me.** In my current projects I normally use Pinia for state, with the frontend calling our Laravel backend API directly. Here I tried Nuxt's built-in Nitro server for the first time, as a small backend-for-frontend that keeps the API key private and handles validation and errors in one place. Because the app is a single page whose state is mostly filters, I kept that state in the URL instead of a Pinia store. If the app grew to several pages sharing data, I would add Pinia.
 
 **How it was tested.**
 - Unit tests: `npm test`, 15 passing (input validation and formatting).
