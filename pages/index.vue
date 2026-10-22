@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RefreshCw } from "lucide-vue-next";
+import { ChevronDown, RefreshCw, SlidersHorizontal } from "lucide-vue-next";
 import type { MetaResponse, OrdersResponse } from "~~/shared/types";
 
 const { query, update, toggleSort, reset, hasFilters } = useOrderFilters();
@@ -68,6 +68,27 @@ const statusLabel = computed(() => {
   const parts = [query.value.status, query.value.site, query.value.q ? `“${query.value.q}”` : undefined].filter(Boolean);
   return parts.length ? parts.join(" · ") : "All orders";
 });
+
+// Filter panel can be collapsed; the choice is remembered per browser.
+// Read after mount so server and client render the same markup first.
+const FILTERS_KEY = "hssb.filtersOpen";
+const filtersOpen = ref(true);
+onMounted(() => {
+  try {
+    filtersOpen.value = localStorage.getItem(FILTERS_KEY) !== "0";
+  } catch {
+    // storage unavailable (private mode etc.): keep the default
+  }
+});
+function toggleFilters() {
+  filtersOpen.value = !filtersOpen.value;
+  try {
+    localStorage.setItem(FILTERS_KEY, filtersOpen.value ? "1" : "0");
+  } catch {
+    // ignore
+  }
+}
+const activeFilterCount = computed(() => [query.value.q, query.value.status, query.value.site].filter(Boolean).length);
 </script>
 
 <template>
@@ -104,12 +125,34 @@ const statusLabel = computed(() => {
       />
 
       <section ref="listTop" class="scroll-mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs" aria-labelledby="orders-heading">
-        <div class="space-y-4 border-b border-slate-200 p-4">
-          <div class="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 id="orders-heading" class="font-semibold text-slate-900">Orders</h2>
-            <p class="truncate text-sm text-slate-500" aria-live="polite">{{ statusLabel }}</p>
+        <div class="border-b border-slate-200 p-4">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex min-w-0 items-baseline gap-3">
+              <h2 id="orders-heading" class="shrink-0 font-semibold text-slate-900">Orders</h2>
+              <p class="truncate text-sm text-slate-500" aria-live="polite">{{ statusLabel }}</p>
+            </div>
+            <button
+              type="button"
+              class="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border px-3 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-brand-500"
+              :class="filtersOpen ? 'border-slate-300 bg-slate-50 text-slate-700 hover:bg-slate-100' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'"
+              :aria-expanded="filtersOpen"
+              aria-controls="order-filters"
+              @click="toggleFilters"
+            >
+              <SlidersHorizontal class="size-4" aria-hidden="true" />
+              <span>{{ filtersOpen ? "Hide filters" : "Show filters" }}</span>
+              <span
+                v-if="activeFilterCount"
+                class="grid size-5 place-items-center rounded-full bg-brand-600 text-xs font-semibold text-white"
+                :aria-label="`${activeFilterCount} active`"
+              >{{ activeFilterCount }}</span>
+              <ChevronDown class="size-4 transition-transform" :class="{ 'rotate-180': filtersOpen }" aria-hidden="true" />
+            </button>
           </div>
           <OrderFilters
+            v-show="filtersOpen"
+            id="order-filters"
+            class="mt-4"
             :q="query.q"
             :status="query.status"
             :site="query.site"
