@@ -29,6 +29,13 @@ const ariaSort = (field?: SortField) =>
 // Show skeleton rows only on first load; on refetch keep old rows visible but dimmed.
 const showSkeleton = computed(() => props.pending && props.orders.length === 0 && !props.error);
 const skeletonRows = computed(() => Math.min(props.pageSize, 10));
+
+// The desktop table scrolls inside a fixed-height box; start each new result set at the top.
+const scroller = ref<HTMLElement | null>(null);
+watch(
+  () => props.orders,
+  () => scroller.value?.scrollTo({ top: 0 }),
+);
 </script>
 
 <template>
@@ -70,9 +77,15 @@ const skeletonRows = computed(() => Math.min(props.pageSize, 10));
 
     <template v-else>
       <!-- Desktop / tablet: table -->
-      <div class="hidden overflow-x-auto md:block" :class="{ 'opacity-60 transition-opacity': pending && !showSkeleton }" :aria-busy="pending">
+      <div
+        ref="scroller"
+        class="hidden max-h-[min(65vh,640px)] overflow-auto overscroll-contain md:block"
+        :class="{ 'opacity-60 transition-opacity': pending && !showSkeleton }"
+        :aria-busy="pending"
+        tabindex="-1"
+      >
         <table class="w-full text-left text-sm">
-          <thead class="border-b border-slate-200 bg-slate-50/80 text-xs uppercase tracking-wide text-slate-500">
+          <thead class="sticky top-0 z-10 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 shadow-[inset_0_-1px_0_var(--color-slate-200)]">
             <tr>
               <th
                 v-for="col in columns"
