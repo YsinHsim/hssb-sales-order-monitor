@@ -98,6 +98,7 @@ const statusLabel = computed(() => {
         :summary="summaryRes?.summary"
         :pending="summaryStatus === 'pending' || summaryStatus === 'idle'"
         :error="Boolean(summaryError)"
+        :active-status="query.status"
         @retry="refreshSummary()"
         @pick-status="(s) => update({ status: s })"
       />

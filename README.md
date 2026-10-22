@@ -2,14 +2,14 @@
 
 A small, responsive web app for a sales team to monitor sales orders across branches, built for the Harrisons Sabah Sdn Bhd IT Executive technical assessment.
 
-- **Live app:** _https://YOUR-APP.vercel.app_ (replace after deploying)
+- **Live app:** https://hssb-sales-order-monitor.vercel.app/
 - **Data source:** the provided read-only mock REST API (`https://hiring.harrisons.my/api/mock/sales-orders`), 1,200 fictional orders.
 
 ## Features
 
 | Requirement | How it is met |
 | --- | --- |
-| Dashboard | Cards for total orders, open/pending, completed (invoiced + delivered, with the split shown), cancelled and total order value (MYR). Clicking *Open* or *Cancelled* filters the list. |
+| Dashboard | Cards for total orders, open/pending, completed (invoiced + delivered, with the split shown), cancelled and total order value (MYR). Clicking a card filters the list: *Total* shows all statuses, *Open* and *Cancelled* filter by that status, and the *Invoiced* / *Delivered* chips in the Completed card filter by each (the API filters one status at a time). The active card is highlighted. |
 | Order listing | Order no. (`SalesId`), customer (`SalesName` + `CustAccount`), branch/site (`InventSiteId`), order date (`CreatedDateTime1`, shown in Malaysia time), status badge and amount (`HAR_TotalSOAmount`). Click a row for full order detail. |
 | Search and filtering | Debounced search (order no., customer, account, PO ref, sales taker) plus branch/site and status dropdowns. Dropdown options and counts come from the API's `/meta` endpoint, not hard-coded. Server-side sorting on 5 columns, pagination with 10/25/50/100 rows. |
 | API integration | All data comes from the API on every request. Nothing from the dataset is bundled in the UI. |
